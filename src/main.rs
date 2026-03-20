@@ -190,32 +190,24 @@ async fn run_app(
                                 }
                             } else {
                                 match key.code {
-                                KeyCode::Char('q') | KeyCode::Esc => {
-                                    if state.show_help {
-                                        state.show_help = false;
-                                    } else if state.show_folder_info {
-                                        state.show_folder_info = false;
-                                    } else if state.is_searching {
-                                        state.is_searching = false;
-                                    } else {
-                                        return Ok(());
-                                    }
-                                }
-                                KeyCode::Char('/') => {
-                                    if !state.is_searching {
-                                        state.is_searching = true;
-                                    } else {
-                                        state.search_query.push('/');
-                                    }
-                                }
                                 KeyCode::Char(c) => {
                                     if state.is_searching {
                                         let mut chars: Vec<char> = state.search_query.chars().collect();
                                         chars.insert(state.search_cursor, c);
                                         state.search_query = chars.into_iter().collect();
                                         state.search_cursor += 1;
+                                    } else if c == 'q' {
+                                        if state.show_help {
+                                            state.show_help = false;
+                                        } else if state.show_folder_info {
+                                            state.show_folder_info = false;
+                                        } else if state.is_searching {
+                                            state.is_searching = false;
+                                        }
                                     } else if c == '?' {
                                         state.show_help = !state.show_help;
+                                    } else if c == '/'{
+                                        state.is_searching = true;
                                     } else if c == 'j' {
                                         if let Some(idx) = state.selected_index {
                                             if idx + 1 < state.results.len() {
