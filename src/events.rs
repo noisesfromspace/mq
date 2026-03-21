@@ -1,6 +1,6 @@
+use crossterm::event::{self, Event as CrosstermEvent};
 use std::time::Duration;
 use tokio::sync::mpsc;
-use crossterm::event::{self, Event as CrosstermEvent};
 
 pub enum AppEvent {
     Input(CrosstermEvent),

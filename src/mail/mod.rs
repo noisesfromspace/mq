@@ -31,22 +31,40 @@ impl Searcher {
             query_string.to_lowercase()
         };
 
-        let db = Database::open_with_config(self.db_path.as_ref(), notmuch::DatabaseMode::ReadOnly, None::<&str>, None::<&str>)?;
+        let db = Database::open_with_config(
+            self.db_path.as_ref(),
+            notmuch::DatabaseMode::ReadOnly,
+            None::<&str>,
+            None::<&str>,
+        )?;
         let query = db.create_query(&actual_query)?;
-        
+
         let messages = query.search_messages()?;
-        
+
         let mut results = Vec::new();
         for message in messages.take(limit) {
             let message_id = message.id().to_string();
-            let subject = message.header("subject").unwrap_or_default().unwrap_or_default().to_string();
-            let from = message.header("from").unwrap_or_default().unwrap_or_default().to_string();
-            let to = message.header("to").unwrap_or_default().unwrap_or_default().to_string();
+            let subject = message
+                .header("subject")
+                .unwrap_or_default()
+                .unwrap_or_default()
+                .to_string();
+            let from = message
+                .header("from")
+                .unwrap_or_default()
+                .unwrap_or_default()
+                .to_string();
+            let to = message
+                .header("to")
+                .unwrap_or_default()
+                .unwrap_or_default()
+                .to_string();
             let date = message.date();
             let path = message.filename().to_path_buf();
-            
+
             // Extract folder from tags or from the path.
-            let folder = path.parent()
+            let folder = path
+                .parent()
                 .and_then(|p| p.parent())
                 .and_then(|p| p.file_name())
                 .map(|f| f.to_string_lossy().to_string())
@@ -62,7 +80,7 @@ impl Searcher {
                 path,
             });
         }
-        
+
         Ok(results)
     }
 }

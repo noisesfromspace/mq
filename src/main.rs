@@ -31,7 +31,7 @@ pub struct Cli {
 
 enum AppMessage {
     SearchResults(Vec<mail::EmailMetadata>),
-    PreviewLoaded(String),
+    PreviewLoaded(String, String),
 }
 
 #[tokio::main]
@@ -98,6 +98,7 @@ async fn run_app(
                         if state.results.is_empty() {
                             state.selected_index = None;
                             state.selected_preview = None;
+                            state.selected_headers = None;
                             state.preview_scroll_y = 0;
                         } else {
                             state.selected_index = Some(0);
@@ -106,8 +107,9 @@ async fn run_app(
                             trigger_preview(&state.results[0].path, &tx, &mut preview_task);
                         }
                     }
-                    AppMessage::PreviewLoaded(preview) => {
+                    AppMessage::PreviewLoaded(preview, headers) => {
                         state.selected_preview = Some(preview);
+                        state.selected_headers = Some(headers);
                     }
                 }
             }
@@ -190,6 +192,17 @@ async fn run_app(
                                 }
                             } else {
                                 match key.code {
+                                KeyCode::Esc => {
+                                    if state.show_help {
+                                        state.show_help = false;
+                                    } else if state.show_folder_info {
+                                        state.show_folder_info = false;
+                                    } else if state.show_headers {
+                                        state.show_headers = false;
+                                    }  else {
+                                        return Ok(());
+                                    }
+                                }
                                 KeyCode::Char(c) => {
                                     if state.is_searching {
                                         let mut chars: Vec<char> = state.search_query.chars().collect();
@@ -201,6 +214,8 @@ async fn run_app(
                                             state.show_help = false;
                                         } else if state.show_folder_info {
                                             state.show_folder_info = false;
+                                        } else if state.show_headers {
+                                            state.show_headers = false;
                                         } else if state.is_searching {
                                             state.is_searching = false;
                                         }
@@ -271,7 +286,13 @@ async fn run_app(
                                         }
                                     } else if c == 'f' {
                                         if !state.results.is_empty() && !state.is_searching {
-                                            state.show_folder_info = true;
+                                            state.show_folder_info = !state.show_folder_info;
+                                            state.show_headers = false;
+                                        }
+                                    } else if c == 'H' {
+                                        if !state.results.is_empty() && !state.is_searching {
+                                            state.show_headers = !state.show_headers;
+                                            state.show_folder_info = false;
                                         }
                                     }
                                 }
@@ -320,7 +341,9 @@ async fn run_app(
                                                 trigger_preview(&state.results[idx + 1].path, &tx, &mut preview_task);
                                             }
                                         }
-                                    }
+                                    } else {
+                                            state.is_searching = false
+                                        }
                                 }
                                 KeyCode::Up => {
                                     if !state.is_searching {
@@ -330,7 +353,9 @@ async fn run_app(
                                                 state.preview_scroll_y = 0;
                                                 state.preview_scroll_x = 0;
                                                 trigger_preview(&state.results[idx - 1].path, &tx, &mut preview_task);
-                                            }
+                                            } else {
+                                                    state.is_searching = true
+                                                }
                                         }
                                     }
                                 }
@@ -347,6 +372,10 @@ async fn run_app(
                                 KeyCode::Enter => {
                                     if state.show_help {
                                         state.show_help = false;
+                                    } else if state.show_folder_info {
+                                        state.show_folder_info = false;
+                                    } else if state.show_headers {
+                                        state.show_headers = false;
                                     } else if state.is_searching {
                                         state.is_searching = false;
                                     } else if let Some(idx) = state.selected_index {
@@ -453,8 +482,8 @@ fn trigger_preview(
     *preview_task = Some(tokio::spawn(async move {
         let res = tokio::task::spawn_blocking(move || mail::preview::generate_preview(&path)).await;
 
-        if let Ok(Ok(preview)) = res {
-            let _ = t.send(AppMessage::PreviewLoaded(preview));
+        if let Ok(Ok((preview, headers))) = res {
+            let _ = t.send(AppMessage::PreviewLoaded(preview, headers));
         }
     }));
 }

@@ -5,9 +5,8 @@
 ## Features
 
 - **Live Debounced Search**: Real-time queries utilizing native `notmuch` C bindings.
-- **Vim-Style Navigation**: Ergonomic, keyboard-driven navigation across queries and results.
 - **HTML Previews**: Transparent rendering of multipart HTML emails directly to plain text using `html2text`, strictly preserving alignment and layouts without aggressive wrapping.
-- **Zero-Friction Context**: Seamlessly open emails in your pager, extract/open HTML components directly in your browser, or display parent folder paths for jumping back into your primary mail client.
+- **Open browser**: Open emails in your pager, extract/open HTML components directly in your browser, or display parent folder paths for jumping back into your primary mail client.
 - **Read-Only**: Safely queries the index. No mutations are made to your `notmuch` database or Maildir.
 
 ## Installation
