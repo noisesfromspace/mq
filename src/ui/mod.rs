@@ -1,10 +1,10 @@
 use crate::mail::EmailMetadata;
 use ratatui::{
-    Frame,
     layout::{Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
     text::{Line, Span},
     widgets::{Block, Borders, List, ListItem, ListState, Paragraph, Wrap},
+    Frame,
 };
 
 pub struct UiState {
@@ -232,7 +232,14 @@ pub fn draw(f: &mut Frame, state: &mut UiState) {
             Line::from("  h/l          : Scroll preview pane left/right"),
             Line::from("  Ctrl+d/u     : Jump down/up 10 items"),
             Line::from("  PgDn/PgUp    : Scroll preview pane down/up"),
-            Line::from("  Ctrl+f/b     : Scroll preview pane down/up"),
+            Line::from("  Ctrl+f/b     : Scroll preview pane down/up (result view)"),
+            Line::from("  Ctrl+f/b     : Move forward/backward one character (search mode)"),
+            Line::from("  Ctrl+a/e     : Go to start/end of search box"),
+            Line::from("  Alt+f/b      : Move by word in search box"),
+            Line::from("  Alt+d        : Delete forward word in search box"),
+            Line::from("  Ctrl+d       : Delete character under cursor (search mode)"),
+            Line::from("  Ctrl+u/k     : Clear to start/end of line (search mode)"),
+            Line::from("  Ctrl+w       : Delete backward word in search box"),
             Line::from("  Ctrl+Left/Right: Move by word in search box"),
             Line::from("  Home/End     : Go to start/end of search box"),
             Line::from("  o            : Open HTML version in browser"),

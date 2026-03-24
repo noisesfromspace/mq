@@ -143,7 +143,12 @@ async fn run_app(
                                         }
                                     }
                                     KeyCode::Char('d') => {
-                                        if !state.is_searching {
+                                        if state.is_searching && state.search_cursor < state.search_query.chars().count() {
+                                            // Forward delete (delete character under cursor)
+                                            let mut chars: Vec<char> = state.search_query.chars().collect();
+                                            chars.remove(state.search_cursor);
+                                            state.search_query = chars.into_iter().collect();
+                                        } else if !state.is_searching {
                                             if let Some(idx) = state.selected_index {
                                                 let new_idx = (idx + 10).min(state.results.len().saturating_sub(1));
                                                 if new_idx != idx {
@@ -156,7 +161,18 @@ async fn run_app(
                                         }
                                     }
                                     KeyCode::Char('u') => {
-                                        if !state.is_searching {
+                                        if state.is_searching {
+                                            // Clear from cursor to beginning of line
+                                            let chars: Vec<char> = state.search_query.chars().collect();
+                                            let mut new_chars = Vec::new();
+                                            for (i, c) in chars.iter().enumerate() {
+                                                if i >= state.search_cursor {
+                                                    new_chars.push(*c);
+                                                }
+                                            }
+                                            state.search_query = new_chars.into_iter().collect();
+                                            state.search_cursor = 0;
+                                        } else {
                                             if let Some(idx) = state.selected_index {
                                                 let new_idx = idx.saturating_sub(10);
                                                 if new_idx != idx {
@@ -169,13 +185,40 @@ async fn run_app(
                                         }
                                     }
                                     KeyCode::Char('f') => {
-                                        if !state.is_searching && state.selected_preview.is_some() {
+                                        if state.is_searching && state.search_cursor < state.search_query.chars().count() {
+                                            state.search_cursor += 1;
+                                        } else if !state.is_searching && state.selected_preview.is_some() {
                                             state.preview_scroll_y = state.preview_scroll_y.saturating_add(10);
                                         }
                                     }
                                     KeyCode::Char('b') => {
-                                        if !state.is_searching && state.selected_preview.is_some() {
+                                        if state.is_searching && state.search_cursor > 0 {
+                                            state.search_cursor -= 1;
+                                        } else if !state.is_searching && state.selected_preview.is_some() {
                                             state.preview_scroll_y = state.preview_scroll_y.saturating_sub(10);
+                                        }
+                                    }
+                                    KeyCode::Char('a') => {
+                                        if state.is_searching {
+                                            state.search_cursor = 0;
+                                        }
+                                    }
+                                    KeyCode::Char('e') => {
+                                        if state.is_searching {
+                                            state.search_cursor = state.search_query.chars().count();
+                                        }
+                                    }
+                                    KeyCode::Char('k') => {
+                                        if state.is_searching && state.search_cursor < state.search_query.chars().count() {
+                                            // Clear from cursor to end of line
+                                            let chars: Vec<char> = state.search_query.chars().collect();
+                                            let mut new_chars = Vec::new();
+                                            for (i, c) in chars.iter().enumerate() {
+                                                if i < state.search_cursor {
+                                                    new_chars.push(*c);
+                                                }
+                                            }
+                                            state.search_query = new_chars.into_iter().collect();
                                         }
                                     }
                                     KeyCode::Left => {
@@ -186,6 +229,42 @@ async fn run_app(
                                     KeyCode::Right => {
                                         if state.is_searching && state.search_cursor < state.search_query.chars().count() {
                                             state.search_cursor = jump_word_right(&state.search_query, state.search_cursor);
+                                        }
+                                    }
+                                    _ => {}
+                                }
+                            } else if key.modifiers.contains(KeyModifiers::ALT) {
+                                match key.code {
+                                    KeyCode::Char('b') => {
+                                        if state.is_searching && state.search_cursor > 0 {
+                                            state.search_cursor = jump_word_left(&state.search_query, state.search_cursor);
+                                        }
+                                    }
+                                    KeyCode::Char('f') => {
+                                        if state.is_searching && state.search_cursor < state.search_query.chars().count() {
+                                            state.search_cursor = jump_word_right(&state.search_query, state.search_cursor);
+                                        }
+                                    }
+                                    KeyCode::Char('d') => {
+                                        if state.is_searching && state.search_cursor < state.search_query.chars().count() {
+                                            let chars: Vec<char> = state.search_query.chars().collect();
+                                            let mut idx = state.search_cursor;
+                                            // Skip whitespace
+                                            while idx < chars.len() && chars[idx].is_whitespace() {
+                                                idx += 1;
+                                            }
+                                            // Skip word characters
+                                            while idx < chars.len() && !chars[idx].is_whitespace() {
+                                                idx += 1;
+                                            }
+                                            // Remove characters from cursor to idx
+                                            let mut new_chars = Vec::new();
+                                            for (i, c) in chars.iter().enumerate() {
+                                                if i < state.search_cursor || i >= idx {
+                                                    new_chars.push(*c);
+                                                }
+                                            }
+                                            state.search_query = new_chars.into_iter().collect();
                                         }
                                     }
                                     _ => {}

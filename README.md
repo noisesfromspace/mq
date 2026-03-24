@@ -4,10 +4,10 @@
 
 ## Features
 
-- **Live Debounced Search**: Real-time queries utilizing native `notmuch` C bindings.
-- **HTML Previews**: Transparent rendering of multipart HTML emails directly to plain text using `html2text`, strictly preserving alignment and layouts without aggressive wrapping.
-- **Open browser**: Open emails in your pager, extract/open HTML components directly in your browser, or display parent folder paths for jumping back into your primary mail client.
-- **Read-Only**: Safely queries the index. No mutations are made to your `notmuch` database or Maildir.
+- **Fast search**: Live search with debouncing using native `notmuch` bindings.
+- **HTML previews**: Renders HTML emails to plain text with `html2text`.
+- **Multiple views**: Open emails in your pager, view HTML in a browser, or check folder info.
+- **Read-only**: Queries without modifying your `notmuch` database or Maildir.
 
 ## Installation
 
@@ -56,7 +56,14 @@ You can optionally override application settings by creating `~/.config/mq/confi
 | Key | Action |
 | --- | --- |
 | `Enter` | Unfocus search and move to Result View |
-| `Ctrl+w` | Delete the previous word |
+| `Ctrl+a` / `Ctrl+e` | Go to start/end of line |
+| `Ctrl+b` / `Ctrl+f` | Move backward/forward one character |
+| `Alt+b` / `Alt+f` | Move backward/forward one word |
+| `Alt+d` | Delete forward word |
+| `Ctrl+d` | Delete character under cursor |
+| `Ctrl+u` | Clear from cursor to start of line |
+| `Ctrl+k` | Clear from cursor to end of line |
+| `Ctrl+w` | Delete backward word |
 | `Ctrl+Left/Right`| Move cursor by word |
 | `Home/End` | Move cursor to the start/end of the query |
 
@@ -68,7 +75,7 @@ You can optionally override application settings by creating `~/.config/mq/confi
 | `Ctrl+d` / `Ctrl+u`| Jump 10 items down/up in the list |
 | `Enter` | Open the selected email with your system `$PAGER` |
 | `PgDn/PgUp` | Scroll the preview pane down/up |
-| `Ctrl+f/b` | Scroll the preview pane down/up |
+| `Ctrl+f/b` | Scroll the preview pane down/up (result view only) |
 | `h` / `l` | Scroll the preview pane horizontally (left/right) |
 | `o` | Extract the HTML part and open it in the system browser |
 | `f` | Show native Maildir folder info (useful for finding the thread in `aerc`) |
